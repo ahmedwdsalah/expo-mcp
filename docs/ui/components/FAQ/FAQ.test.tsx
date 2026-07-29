@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { type PropsWithChildren, type ReactNode } from 'react';
 
+import { axe } from '~/common/test-utilities';
+
 jest.unstable_mockModule('~/ui/components/StructuredData', () => ({
   StructuredData: ({ data, id }: { data: Record<string, unknown>; id: string }) => (
     <div data-testid={id}>{JSON.stringify(data)}</div>
@@ -40,7 +42,7 @@ describe('FAQ', () => {
     );
 
     const el = screen.getByTestId('faq');
-    const data = JSON.parse(el.textContent!);
+    const data = JSON.parse(el.textContent ?? '');
 
     expect(data['@type']).toBe('FAQPage');
     expect(data.mainEntity).toHaveLength(2);
@@ -64,7 +66,7 @@ describe('FAQ', () => {
     );
 
     const el = screen.getByTestId('faq');
-    const data = JSON.parse(el.textContent!);
+    const data = JSON.parse(el.textContent ?? '');
 
     expect(data.mainEntity[0].name).toBe('Can I use expo-camera?');
   });
@@ -78,5 +80,15 @@ describe('FAQ', () => {
 
     expect(screen.queryByTestId('faq')).not.toBeInTheDocument();
     expect(screen.getByText('Just a paragraph.')).toBeInTheDocument();
+  });
+
+  it('has no axe violations', async () => {
+    const { container } = render(
+      <FAQ>
+        <FakeCollapsible summary="Question one?">Answer one.</FakeCollapsible>
+        <FakeCollapsible summary="Question two?">Answer two.</FakeCollapsible>
+      </FAQ>
+    );
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

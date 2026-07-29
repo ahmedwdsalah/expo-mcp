@@ -25,17 +25,17 @@ export function Content({ imgSrc, darkImgSrc, alt, href, content }: Props) {
 
   return (
     <div>
-      <div className="bg-screen flex items-center justify-center">
+      <div className="flex items-center justify-center bg-screen">
         <picture className="relative">
           {isDarkMode && <source srcSet={darkImgSrc} type="image/png" />}
-          <img src={imgSrc} alt={alt} className="size-[300px]" />
+          <img src={imgSrc} alt={alt} className="size-75" />
         </picture>
       </div>
-      <div className="border-default bg-default flex flex-col items-start gap-3 border-t px-6 pb-6">
+      <div className="flex flex-col items-start gap-3 border-t border-default bg-default px-6 pb-6">
         <div>
           {content}
           {href && (
-            <Button href={href} rightSlot={<ArrowRightIcon />} theme="secondary">
+            <Button href={href} rightSlot={<ArrowRightIcon aria-hidden="true" />} theme="secondary">
               Learn more
             </Button>
           )}

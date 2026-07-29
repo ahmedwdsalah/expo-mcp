@@ -1,7 +1,7 @@
 extends: capitalization
 message: "'%s' should be in sentence case"
 link: 'https://github.com/expo/expo/blob/main/guides/Expo%20Documentation%20Writing%20Style%20Guide.md#headings'
-level: warning
+level: error
 scope:
   - heading.h2
   - heading.h3
@@ -22,6 +22,7 @@ exceptions:
   - '.*web.*'
   - '.*AASA.*'
   - '.*AES.*'
+  - '.*\bAI\b.*'
   - '.*API.*'
   - '.*APIs.*'
   - '.*^Android(.*)'
@@ -42,6 +43,7 @@ exceptions:
   - '.*Apple Developer Portal.*'
   - '.*Apple ID.*'
   - '.*Apple Pay.*'
+  - '.*Argent.*'
   - '.*Asset Links.*'
   - '.*Async Storage.*'
   - '.*Autolinking.*'
@@ -50,6 +52,7 @@ exceptions:
   - '.*AWS.*'
   - '.*Babel.*'
   - '.*babel\.config\.js.*'
+  - '.*Beta App Review.*'
   - '.*Bundler.*'
   - '.*Cache-Control.*'
   - '.*Can I pay.*'
@@ -57,16 +60,21 @@ exceptions:
   - '.*CDN.*'
   - '.*Chrome.*'
   - '.*CLI.*'
+  - '.*TTI.*'
   - '.*Classic Updates.*'
+  - '.*Claude Code.*'
+  - '.*Clerk.*'
   - '.*CNG.*'
   - '.*CocoaPods.*'
   - '.*CodePush.*'
+  - '.*Codex.*'
   - '.*Convex.*'
   - '.*Command Line Tools.*'
   - '.*Config Plugin.*'
   - '.*CORS.*'
   - '.*CRUD.*'
   - '.*credentials\.json.*'
+  - '.*Cursor.*'
   - '.*DevTools.*'
   - '.*Developer Console.*'
   - '.*Developer Mode.*'
@@ -83,6 +91,7 @@ exceptions:
   - '.*Element Inspector.*'
   - '.*Environment Variables.*'
   - '.*ESLint.*'
+  - '.*EXIF.*'
   - '.*Expo.*'
   - '.*ExpoKit.*'
   - '.*Expo Application Services.*'
@@ -104,6 +113,7 @@ exceptions:
   - '.*fingerprintignore.*'
   - '.*fingerprint.config.js.*'
   - '.*Generate.*Android.*'
+  - '.*\bGET\b.*'
   - '.*GitHub.*'
   - '.*GitHub Pages.*'
   - '.*Google.*'
@@ -125,6 +135,7 @@ exceptions:
   - '.*HTTPS.*'
   - '.*Info\.plist.*'
   - '.*iOS.*Simulator.*'
+  - '.*JDK.*'
   - '.*JSON.*'
   - '.*JavaScript.*'
   - '.*JavaScriptCore.*'
@@ -137,6 +148,7 @@ exceptions:
   - '.*Link component.*'
   - '.*Linking.*'
   - '.*MCP*'
+  - '.*Material Symbols.*'
   - '.*MultiBrowse.*'
   - '.*macOS.*'
   - '.*manifest\.json.*'
@@ -153,6 +165,7 @@ exceptions:
   - '.*OAuth.*'
   - '.*OTA.*'
   - '.*OTF.*'
+  - '.*\bPOST\b.*'
   - '.*PostCSS.*'
   - '.*PostHog.*'
   - '.*PRAGMA.*'
@@ -201,6 +214,7 @@ exceptions:
   - '.*TLS.*'
   - '.*Transporter.*'
   - '.*TTF.*'
+  - '.*TTI.*'
   - '.*Turtle.*'
   - '.*TV.*'
   - '.*TypeScript.*'
@@ -301,7 +315,16 @@ exceptions:
   - Live Activity
   - 'Prerequisite: Creating widget'
   - 'Prerequisite: Creating Live Activity'
+  - 'Prerequisite: Creating a widget'
+  - 'Prerequisite: Creating a Live Activity'
   - Hiding the Tab bar
   - Integrated vs Isolated
   - Expo Skills
   - DSL
+  - TriStateCheckbox
+  - MainApplication
+  - MainActivity
+  - HorizontalCenteredHeroCarousel
+  - HorizontalUncontainedCarousel
+  - Serving Markdown to AI Agents
+  - Clerk Publishable Key

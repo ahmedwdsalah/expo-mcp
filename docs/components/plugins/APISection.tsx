@@ -26,6 +26,7 @@ import {
   getCommentContent,
   getPossibleComponentPropsNames,
 } from '~/components/plugins/api/APISectionUtils';
+import { type ApiSectionData, useApiSectionData } from '~/providers/api-data';
 import { usePageApiVersion } from '~/providers/page-api-version';
 import versions from '~/public/static/constants/versions.json';
 import { WithTestRequire } from '~/types/common';
@@ -171,6 +172,7 @@ const groupByHeader = (entries: ApiDataEntry[]) => {
 
 const renderAPI = (
   sdkVersion: string,
+  apiSectionData: ApiSectionData | undefined,
   {
     packageName,
     apiName,
@@ -179,27 +181,45 @@ const renderAPI = (
   }: Omit<Props, 'forceVersion'>
 ) => {
   try {
+    const loadPackageData = (name?: string): GeneratedData[] => {
+      if (testRequire) {
+        const { children } = testRequire(`~/public/static/data/${sdkVersion}/${name}.json`);
+        return children;
+      }
+      const children = apiSectionData?.[`${sdkVersion}/${name}`];
+      if (!children) {
+        throw new Error(
+          `Missing API data for ${sdkVersion}/${name}: the page's getStaticProps did not provide it. ` +
+            'This usually means mdx-plugins/remark-api-section-data.js could not resolve this <APISection> ' +
+            'usage at build time. Keep packageName (and forceVersion) string or array-of-string literals ' +
+            'in the MDX source so the data can be loaded with the page.'
+        );
+      }
+      return children as GeneratedData[];
+    };
+
     let data: GeneratedData[] = [];
-    const isRouterPackage = (name?: string) => !!name && name.startsWith('expo-router');
-    const shouldDeriveRouterComponents = Array.isArray(packageName)
-      ? packageName.some(isRouterPackage)
-      : isRouterPackage(packageName);
+    // `deriveComponentsFromProps` synthesizes a derived component entry
+    // for each static property typed as `React.FC<X>` or similar. It
+    // powers compound-component APIs like `Stack.Screen` in `expo-router`
+    // and `FieldGroup.Section` in `expo-ui`.
+    //
+    // Scope the opt-in to those package families so unrelated docs aren't
+    // affected if their props happen to match the heuristic. Drop the gate
+    // when more packages adopt the pattern.
+    const isCompoundComponentsPackage = (name?: string) =>
+      !!name && (name.startsWith('expo-router') || name.startsWith('expo-ui'));
+    const shouldDeriveCompoundComponents = Array.isArray(packageName)
+      ? packageName.some(isCompoundComponentsPackage)
+      : isCompoundComponentsPackage(packageName);
 
     if (Array.isArray(packageName)) {
       data = packageName
-        .map(name => {
-          const { children } = testRequire
-            ? testRequire(`~/public/static/data/${sdkVersion}/${name}.json`)
-            : require(`~/public/static/data/${sdkVersion}/${name}.json`);
-          return children;
-        })
+        .map(name => loadPackageData(name))
         .flat()
         .sort((a: GeneratedData, b: GeneratedData) => a.name.localeCompare(b.name));
     } else {
-      const { children } = testRequire
-        ? testRequire(`~/public/static/data/${sdkVersion}/${packageName}.json`)
-        : require(`~/public/static/data/${sdkVersion}/${packageName}.json`);
-      data = children;
+      data = loadPackageData(packageName);
     }
 
     const functionLikeEntries = data.filter(isFunctionLikeEntry);
@@ -228,7 +248,7 @@ const renderAPI = (
     const hasCategorizedMethods = Object.keys(categorizedMethods).length > 0;
     const hasHeadersMapping = Object.keys(headersMapping).length;
 
-    const types = filterDataByKind(
+    const allTypes = filterDataByKind(
       data,
       [TypeDocKind.TypeAlias, TypeDocKind.TypeAlias_Legacy],
       entry =>
@@ -242,6 +262,8 @@ const renderAPI = (
           entry.children
         )
     );
+    const types = allTypes.filter(entry => entry._source !== 'plugin');
+    const configPluginTypes = allTypes.filter(entry => entry._source === 'plugin');
 
     const props = filterDataByKind(
       data,
@@ -305,7 +327,7 @@ const renderAPI = (
       [TypeDocKind.Variable, TypeDocKind.Class, TypeDocKind.Function],
       entry => isComponent(entry) || isRouterUiComponentOverride(entry)
     );
-    const componentsWithDerived = shouldDeriveRouterComponents
+    const componentsWithDerived = shouldDeriveCompoundComponents
       ? deriveComponentsFromProps(components)
       : components;
     const componentsPropNames = new Set(
@@ -422,6 +444,11 @@ const renderAPI = (
         <APISectionNamespaces data={namespaces} sdkVersion={sdkVersion} />
         <APISectionInterfaces data={interfaces} sdkVersion={sdkVersion} />
         <APISectionTypes data={types} sdkVersion={sdkVersion} />
+        <APISectionTypes
+          data={configPluginTypes}
+          sdkVersion={sdkVersion}
+          header="Config plugin types"
+        />
         <APISectionEnums data={enums} />
       </>
     );
@@ -435,6 +462,7 @@ const isDevMode = process.env.NODE_ENV === 'development';
 
 const APISection = ({ forceVersion, ...restProps }: Props) => {
   const { version } = usePageApiVersion();
+  const apiSectionData = useApiSectionData();
   const resolvedVersion =
     forceVersion ??
     (version === 'unversioned' ? version : version === 'latest' ? LATEST_VERSION : version);
@@ -445,7 +473,7 @@ const APISection = ({ forceVersion, ...restProps }: Props) => {
     }
   }, []);
 
-  return renderAPI(resolvedVersion, restProps);
+  return renderAPI(resolvedVersion, apiSectionData, restProps);
 };
 
 export default APISection;
